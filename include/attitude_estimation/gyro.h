@@ -24,7 +24,6 @@ public:
   {}
   virtual ~Gyro() {}
 
-private:
   Vector3d gyr_; //!< gyroscope data
   double   t_;   //!< timestamp
 }; // class Gyro
