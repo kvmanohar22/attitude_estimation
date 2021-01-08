@@ -22,10 +22,8 @@ INCLUDE_DIRECTORIES(
   ${catkin_INCLUDE_DIRS}
 )
 
-LIST(APPEND SRCS
-)
-
-ADD_LIBRARY(attitude_estimation SHARED ${SRCS})
 LIST(APPEND LINK_LIBS ${catkin_LIBRARIES})
-TARGET_LINK_LIBRARIES(attitude_estimation ${LINK_LIBS})
+
+ADD_EXECUTABLE(test_att_est test/test_att_est.cpp)
+TARGET_LINK_LIBRARIES(test_att_est ${LINK_LIBS})
 

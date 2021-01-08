@@ -30,6 +30,7 @@ public:
   /// updates state and covariance
   virtual void update(const Gyro& gyro)
   {
+    dt_ = gyro.t_ - t_; 
     propagateState(gyro);
     
     // we are not doing any bias compensation

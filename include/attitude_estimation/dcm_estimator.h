@@ -12,16 +12,16 @@ namespace att_est
 class DcmEstimator final : public AbstractEstimator
 {
 public:
-  DcmEstimator(Vector3d gyro_noise_continuous, double dt) : AbstractEstimator()
+  DcmEstimator(Vector3d gyro_noise_sq_continuous, double dt) : AbstractEstimator()
   {
     dR_ij_.setIdentity();
     R_w_b_.setIdentity();
     cov_gd_.setZero();
 
-    // convert from continuous to discrete white noise
-    cov_gd_(0,0) = gyro_noise_continuous(0) / dt;
-    cov_gd_(1,1) = gyro_noise_continuous(1) / dt;
-    cov_gd_(2,2) = gyro_noise_continuous(2) / dt;
+    // convert from variance from continuous to discrete
+    cov_gd_(0,0) = gyro_noise_sq_continuous(0) / dt;
+    cov_gd_(1,1) = gyro_noise_sq_continuous(1) / dt;
+    cov_gd_(2,2) = gyro_noise_sq_continuous(2) / dt;
   }
   virtual ~DcmEstimator() {}
 

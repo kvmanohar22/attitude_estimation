@@ -1,0 +1,11 @@
+<launch>
+    <!-- start rosbag -->
+    <arg name="bag_path" default="$(find attitude_estimation)/assets/test.bag"/>
+    <node type="play" name="rosbag" pkg="rosbag" args="$(arg bag_path)"/>
+   
+    <!-- start node -->
+    <env name="ROSCONSOLE_CONFIG_FILE" value="$(find attitude_estimation)/param/rosconsole.conf"/>
+    <node type="test_att_est" name="attitude_estimation" pkg="attitude_estimation" output="screen">
+      <rosparam file="$(find attitude_estimation)/param/imu_adis16448.yaml" />
+    </node> 
+</launch>
