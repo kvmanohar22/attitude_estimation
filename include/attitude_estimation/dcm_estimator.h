@@ -43,8 +43,8 @@ public:
   virtual void propagateState(const Gyro& gyro) override
   {
     // compute matrix exponential
-    Matrix3d sq = sqew(gyro.gyr_); 
-    dR_jminus_j_ = sq.exp(); 
+    Matrix3d sq = sqew(gyro.gyr_*dt_);
+    dR_jminus_j_ = sq.exp();
     dR_ij_ = dR_ij_ * dR_jminus_j_;
 
     // since initial attitude is identity

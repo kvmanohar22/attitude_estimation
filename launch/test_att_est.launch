@@ -1,6 +1,6 @@
 <launch>
     <!-- start rosbag -->
-    <arg name="bag_path" default="$(find attitude_estimation)/assets/test1_static.bag"/>
+    <arg name="bag_path" default="$(find attitude_estimation)/assets/test0_dynamic.bag"/>
     <node type="play" name="rosbag" pkg="rosbag" args="$(arg bag_path)"/>
 
     <!-- start rviz -->
