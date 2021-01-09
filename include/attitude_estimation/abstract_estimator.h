@@ -10,10 +10,15 @@ namespace att_est
 class AbstractEstimator
 {
 public:
-  AbstractEstimator()
+  AbstractEstimator(Vector3d gyro_noise_sq_continuous, double dt)
   {
     t_ = 0.0; 
     cov_.setZero();
+    cov_gd_.setZero();
+
+    cov_gd_(0,0) = gyro_noise_sq_continuous(0) / dt;
+    cov_gd_(1,1) = gyro_noise_sq_continuous(1) / dt;
+    cov_gd_(2,2) = gyro_noise_sq_continuous(2) / dt;
   }
 
   virtual ~AbstractEstimator() {}
@@ -43,6 +48,7 @@ public:
 protected:
   double      t_;      //!< latest time 
   Matrix3d    cov_;    //!< covariance of state
+  Matrix3d    cov_gd_; //!< (discrete) gyroscope noise covariance matrix
   double      dt_;     //!< latest delta t 
 }; // class AbstractEstimator
 

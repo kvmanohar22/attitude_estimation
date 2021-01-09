@@ -1,7 +1,9 @@
 #include "attitude_estimation/dcm_estimator.h"
+#include "attitude_estimation/euler_estimator.h"
+#include "attitude_estimation/quaternion_estimator.h"
 #include "attitude_estimation/gyro.h"
 #include "attitude_estimation/utils.h"
-#include "attitude_estimation/viz.h"
+#include "attitude_estimation/visualizer.h"
 
 #include <ios>
 #include <ros/init.h>
@@ -36,7 +38,9 @@ private:
   ros::Rate          rate_;
   std::ofstream      ofs_;
   bool               start_;
-  AbstractEstimator* dcm_estimator_;
+  AbstractEstimator* dcm_estimator_; //<! DCM
+  AbstractEstimator* elr_estimator_; //<! euler
+  AbstractEstimator* qat_estimator_; //<! quaternions
   Visualizer         viz_;
 }; // class TestInsInitAccObs
 
@@ -60,6 +64,8 @@ TestAttEstimation::TestAttEstimation(ros::NodeHandle& nh)
   ros::param::get("/attitude_estimation/update_rate", update_rate);
   double dt = 1.0/update_rate;
   dcm_estimator_ = new DcmEstimator(gyro_noise, dt);
+  elr_estimator_ = new EulerEstimator(gyro_noise, dt);
+  qat_estimator_ = new QuaternionEstimator(gyro_noise, dt);
 
   // open file for writing debug data and add header
   ofs_.open("/tmp/att_est.csv");
@@ -88,6 +94,9 @@ void TestAttEstimation::writeLog(const double t, Vector3d& rpy, Matrix3d& P)
 TestAttEstimation::~TestAttEstimation()
 {
   ofs_.close();
+  delete dcm_estimator_;
+  delete elr_estimator_;
+  delete qat_estimator_;
 }
 
 void TestAttEstimation::imuCb(const sensor_msgs::Imu::ConstPtr& msg)
@@ -105,15 +114,22 @@ void TestAttEstimation::imuCb(const sensor_msgs::Imu::ConstPtr& msg)
 
   // dcm estimation 
   dcm_estimator_->update(packet);
+  elr_estimator_->update(packet);
+  qat_estimator_->update(packet);
  
-  // write log 
+  // visualize
   Matrix3d dcm_cov = dcm_estimator_->getCovariance();  
   Matrix3d dcm_R   = static_cast<DcmEstimator*>(dcm_estimator_)->getR();
-  Vector3d dcm_rpy = dcm2rpy(dcm_R);
-  writeLog(msg->header.stamp.toSec(), dcm_rpy, dcm_cov);
+
+  Vector3d euler_angles = static_cast<EulerEstimator*>(elr_estimator_)->getEulerAngles();
+  Eigen::Quaterniond quat = static_cast<QuaternionEstimator*>(qat_estimator_)->getQuat();
 
   // publish to rviz
-  viz_.publishPose(msg->header.stamp.toSec(), dcm_R);
+  viz_.publishPoseAll(
+      msg->header.stamp.toSec(),
+      dcm_R, dcm_cov,
+      euler_angles, dcm_cov,
+      quat);
 }
 
 } // namespace att_est

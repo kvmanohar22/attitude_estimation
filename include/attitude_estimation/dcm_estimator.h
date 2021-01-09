@@ -12,16 +12,11 @@ namespace att_est
 class DcmEstimator final : public AbstractEstimator
 {
 public:
-  DcmEstimator(Vector3d gyro_noise_sq_continuous, double dt) : AbstractEstimator()
+  DcmEstimator(Vector3d gyro_noise_sq_continuous, double dt)
+    : AbstractEstimator(gyro_noise_sq_continuous, dt)
   {
     dR_ij_.setIdentity();
     R_w_b_.setIdentity();
-    cov_gd_.setZero();
-
-    // convert from variance from continuous to discrete
-    cov_gd_(0,0) = gyro_noise_sq_continuous(0) / dt;
-    cov_gd_(1,1) = gyro_noise_sq_continuous(1) / dt;
-    cov_gd_(2,2) = gyro_noise_sq_continuous(2) / dt;
   }
   virtual ~DcmEstimator() {}
 
@@ -54,12 +49,12 @@ public:
   virtual void propagateCovariance(const Vector3d& phi) override
   {
     Matrix3d r_jac = computeSO3rightJac(phi);
-    cov_ = dR_jminus_j_.transpose() * cov_ * dR_jminus_j_ + r_jac * cov_gd_ * r_jac.transpose() * (dt_*dt_); 
+    cov_ = dR_jminus_j_.transpose() * cov_ * dR_jminus_j_
+      + r_jac * cov_gd_ * r_jac.transpose() * (dt_*dt_); 
   }
 
 private:
   Matrix3d    dR_jminus_j_;   //!< latest imu's delta rotation measurement 
-  Matrix3d    cov_gd_;        //!< discrete covariance matrix of gyroscope 
   Matrix3d    R_w_b_;         //!< transforms vectors from (b)ody frame to (w)orld frame
   Matrix3d    dR_ij_;         //!< preintegrated rotation delta measurement
 }; // class DcmEstimator

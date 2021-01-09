@@ -45,35 +45,45 @@ public:
     header_msg.stamp = stamp;
     header_msg.seq = seq_id_;
 
-    geometry_msgs::PoseStamped msg;
+
+    geometry_msgs::PoseWithCovarianceStamped msg;
     msg.header = header_msg;
-    msg.pose.orientation.x = q.x();
-    msg.pose.orientation.y = q.y();
-    msg.pose.orientation.z = q.z();
-    msg.pose.orientation.w = q.w();
-    msg.pose.position.y = 0.0;
-    msg.pose.position.z = 0.0;
+    msg.pose.pose.orientation.x = q.x();
+    msg.pose.pose.orientation.y = q.y();
+    msg.pose.pose.orientation.z = q.z();
+    msg.pose.pose.orientation.w = q.w();
+    msg.pose.pose.position.x = 0.0;
+    msg.pose.pose.position.y = 0.0;
+    msg.pose.pose.position.z = 0.0;
+    msg.pose.covariance.fill(0.0);
+    for(size_t i=0; i<6; ++i)
+    {
+      for(size_t j=0; j<6; ++j)
+      {
+        if(i>=3 && j >=3)
+          msg.pose.covariance[i*6+j] = cov(i-3, j-3);
+        else
+          msg.pose.covariance[i*6+j] = 0.0;
+      } 
+    }
 
     switch(type)
     {
       case AttitudeType::DCM:
         {
-          msg.pose.position.x = -4.0;
-          header_msg.frame_id = "dcm_body";
+          msg.header.frame_id = "dcm_body";
           pose_pub_dcm_.publish(msg); 
           break; 
         }
       case AttitudeType::EULER:
         {
-          msg.pose.position.x = 0.0;
-          header_msg.frame_id = "euler_body";
+          msg.header.frame_id = "euler_body";
           pose_pub_euler_.publish(msg); 
           break; 
         }
       case AttitudeType::QUAT:
         {
-          msg.pose.position.x = 0.0;
-          header_msg.frame_id = "quat_body";
+          msg.header.frame_id = "quat_body";
           pose_pub_quat_.publish(msg); 
           break; 
         }
@@ -90,13 +100,13 @@ public:
 
     // DCM to quaternion
     Eigen::Quaterniond q_dcm(R);
-    
+
     // convert euler angles to quaternion (ZYX convention)
-    Matrix3d R_euler = rz(-phi.z()) * ry(-phi.y()) * rx(-phi.x());
+    Matrix3d R_euler = rz(phi.z()) * ry(phi.y()) * rx(phi.x());
     Eigen::Quaterniond q_euler(R_euler);
 
     Matrix3d q_cov; q_cov.setIdentity();
-    publishPose(time, q_dcm, q_cov, AttitudeType::DCM);
+    publishPose(time, q_dcm, R_cov, AttitudeType::DCM);
     publishPose(time, quat, R_cov, AttitudeType::QUAT);
     publishPose(time, q_euler, phi_cov, AttitudeType::EULER);
   }
@@ -108,7 +118,6 @@ private:
   ros::Publisher  pose_pub_quat_;
   size_t seq_id_;
 }; // class Visualizer
-
 
 } // namespace att_est
 
