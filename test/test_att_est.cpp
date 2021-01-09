@@ -1,6 +1,7 @@
 #include "attitude_estimation/dcm_estimator.h"
 #include "attitude_estimation/gyro.h"
 #include "attitude_estimation/utils.h"
+#include "attitude_estimation/viz.h"
 
 #include <ios>
 #include <ros/init.h>
@@ -36,13 +37,15 @@ private:
   std::ofstream      ofs_;
   bool               start_;
   AbstractEstimator* dcm_estimator_;
+  Visualizer         viz_;
 }; // class TestInsInitAccObs
 
 TestAttEstimation::TestAttEstimation(ros::NodeHandle& nh)
   : nh_(nh),
     quit_(false),
     rate_(1000),
-    start_(false)
+    start_(false),
+    viz_(nh)
 {
   std::string rostopic; 
   ros::param::get("/attitude_estimation/rostopic", rostopic);
@@ -77,7 +80,7 @@ void TestAttEstimation::writeLog(const double t, Vector3d& rpy, Matrix3d& P)
        << P(0,0) << "," << P(1,1) << ","<< P(2,2) << ","
        << rpy[0] << "," << rpy[1] << ","<< rpy[2] << "\n";
 
-  ROS_DEBUG_STREAM_THROTTLE(1.0,
+  ROS_DEBUG_STREAM_THROTTLE(3.0,
       "cov = " << P(0,0) << " " << P(1,1) << " " << P(2,2) << "\t"
       "rpy = " << rpy[0] << " " << rpy[1] << " " << rpy[2]);
 }
@@ -108,6 +111,9 @@ void TestAttEstimation::imuCb(const sensor_msgs::Imu::ConstPtr& msg)
   Matrix3d dcm_R   = static_cast<DcmEstimator*>(dcm_estimator_)->getR();
   Vector3d dcm_rpy = dcm2rpy(dcm_R);
   writeLog(msg->header.stamp.toSec(), dcm_rpy, dcm_cov);
+
+  // publish to rviz
+  viz_.publishPose(msg->header.stamp.toSec(), dcm_R);
 }
 
 } // namespace att_est

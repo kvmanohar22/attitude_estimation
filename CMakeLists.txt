@@ -8,10 +8,10 @@ SET(CMAKE_VERBOSE_MAKEFILE OFF)
 SET(CMAKE_CXX_FLAGS "-Wall -g -Wno-unused-variable -Wno-unused-but-set-variable -Wno-unknown-pragmas -Wpedantic")
 
 FIND_PACKAGE(Eigen3 REQUIRED)
-FIND_PACKAGE(catkin REQUIRED COMPONENTS roscpp std_msgs sensor_msgs)
+FIND_PACKAGE(catkin REQUIRED COMPONENTS roscpp std_msgs sensor_msgs geometry_msgs)
 catkin_package(
   DEPENDS Eigen3
-  CATKIN_DEPENDS roscpp std_msgs sensor_msgs
+  CATKIN_DEPENDS roscpp std_msgs sensor_msgs geometry_msgs
   INCLUDE_DIRS include
   LIBRARIES attitude_estimation
 )

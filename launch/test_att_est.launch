@@ -1,11 +1,18 @@
 <launch>
     <!-- start rosbag -->
-    <arg name="bag_path" default="$(find attitude_estimation)/assets/test.bag"/>
+    <arg name="bag_path" default="$(find attitude_estimation)/assets/test1_static.bag"/>
     <node type="play" name="rosbag" pkg="rosbag" args="$(arg bag_path)"/>
-   
+
+    <!-- start rviz -->
+    <node type="rviz" name="rviz" pkg="rviz" args="-d $(find attitude_estimation)/rqt.rviz"/>
+
+    <!-- publish static transform -->
+    <node pkg="tf2_ros" type="static_transform_publisher" name="static_broadcaster"
+          args="0 0 0 0 0 0 world body"/>
+ 
     <!-- start node -->
     <env name="ROSCONSOLE_CONFIG_FILE" value="$(find attitude_estimation)/param/rosconsole.conf"/>
     <node type="test_att_est" name="attitude_estimation" pkg="attitude_estimation" output="screen">
-      <rosparam file="$(find attitude_estimation)/param/imu_adis16448.yaml" />
+        <rosparam file="$(find attitude_estimation)/param/imu_adis16448.yaml" />
     </node> 
 </launch>
