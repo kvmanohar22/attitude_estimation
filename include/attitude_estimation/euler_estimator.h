@@ -22,7 +22,7 @@ public:
     const double sin_alpha = sin(theta(0)); 
     const double cos_alpha = cos(theta(0)); 
     const double cos_beta  = cos(theta(1)); 
-    const double tan_beta  = cos(theta(1)); 
+    const double tan_beta  = tan(theta(1)); 
 
     Matrix3d E;
     E(0,0) = 1.0; 

@@ -102,7 +102,7 @@ public:
     Eigen::Quaterniond q_dcm(R);
 
     // convert euler angles to quaternion (ZYX convention)
-    Matrix3d R_euler = rz(phi.z()) * ry(phi.y()) * rx(phi.x());
+    Matrix3d R_euler = rz(-phi.z()) * ry(-phi.y()) * rx(-phi.x());
     Eigen::Quaterniond q_euler(R_euler);
 
     Matrix3d q_cov; q_cov.setIdentity();
